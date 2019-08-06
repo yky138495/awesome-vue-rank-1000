@@ -14,7 +14,7 @@ import hashlib
 language='vue'
 stars='800'
 page_start=1
-page_end=10
+page_end=100
 l_a_start=0
 
 url = 'https://github.com/search?utf8=%E2%9C%93&q=language%3A'+language + '+stars%3A%3E'+stars+'&type='
@@ -79,7 +79,6 @@ def par_html(html):
         soup_b=BeautifulSoup(html,'lxml')
         p=l_a_start
         a1_list=soup_b.find_all("li", class_="repo-list-item d-flex flex-column flex-md-row flex-justify-start py-4 public source")
-
         for a0_text in a1_list[l_a_start:]:
             p=p+1
             print(str(p))
@@ -120,6 +119,12 @@ def par_html(html):
             "des":des,
             }
             insert_data(data_t)
+        if len(a1_list)<9:
+            return False
+        else:
+            return True
+
+
 
 def handle_request(h_url,p):
     url=h_url + '&p=' + str(p)
@@ -207,9 +212,13 @@ def os_mk_dir(path):
 
 def write_to_file(str_f):
     language_dir = file_parent_dir + language + '/'
+    language_root_readme= file_parent_dir + '/' + 'README.md'
     readme_dir = language_dir + 'README.md'
     os_mk_dir(language_dir)
     with open(readme_dir, "w", encoding='utf-8') as f:
+        f.write(str(str_f))
+        f.close()
+    with open(language_root_readme, "w", encoding='utf-8') as f:
         f.write(str(str_f))
         f.close()
 
@@ -219,8 +228,10 @@ if __name__ == "__main__":
     creat_database(path_b)
     for p_n in range(page_start,page_end):
         html_doc_b = handle_request(url,p_n)
-        par_html(html_doc_b)
-        time.sleep(2)
+        if par_html(html_doc_b):
+            time.sleep(2)
+        else:
+            break
 
     str_mark = make_mark_down()
     write_to_file(str_mark)
